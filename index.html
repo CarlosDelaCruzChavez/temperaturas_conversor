@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Temperaturas Conversor</title>
+    <!-- Cargar Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #4a0404 0%, #7f1d1d 50%, #991b1b 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(12px);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 relative">
+
+    <!-- Canvas para figuras flotantes rojas en movimiento -->
+    <canvas id="bgCanvas" class="fixed inset-0 pointer-events-none z-0 w-full h-full"></canvas>
+
+    <div class="glass-card rounded-2xl shadow-2xl w-full max-w-md p-6 sm:p-8 relative z-10 border border-red-200/50">
+        
+        <!-- Encabezado -->
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-100 text-red-600 mb-4 shadow-inner">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+            </div>
+            <h1 class="text-2xl font-bold text-gray-900">Temperaturas Conversor</h1>
+            <p class="text-gray-500 mt-2 text-sm">Convierte fácilmente entre Celsius, Fahrenheit y Kelvin.</p>
+        </div>
+
+        <!-- Formulario de conversión -->
+        <div class="space-y-6">
+            
+            <!-- Entrada: Grados Celsius -->
+            <div>
+                <label for="celsius" class="block text-sm font-medium text-gray-700 mb-1">Celsius (°C)</label>
+                <div class="relative">
+                    <input type="number" id="celsius" placeholder="Ej: 25" class="w-full pl-4 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all duration-200 bg-gray-50 text-gray-800 text-lg shadow-sm" oninput="convertirDesdeCelsius()">
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400 font-semibold">
+                        °C
+                    </div>
+                </div>
+            </div>
+
+            <!-- Divisor visual -->
+            <div class="flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                </svg>
+            </div>
+
+            <!-- Entrada: Grados Fahrenheit -->
+            <div>
+                <label for="fahrenheit" class="block text-sm font-medium text-gray-700 mb-1">Fahrenheit (°F)</label>
+                <div class="relative">
+                    <input type="number" id="fahrenheit" placeholder="Ej: 77" class="w-full pl-4 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all duration-200 bg-gray-50 text-gray-800 text-lg shadow-sm" oninput="convertirDesdeFahrenheit()">
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400 font-semibold">
+                        °F
+                    </div>
+                </div>
+            </div>
+
+            <!-- Divisor visual -->
+            <div class="flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+                </svg>
+            </div>
+
+            <!-- Entrada: Grados Kelvin -->
+            <div>
+                <label for="kelvin" class="block text-sm font-medium text-gray-700 mb-1">Kelvin (K)</label>
+                <div class="relative">
+                    <input type="number" id="kelvin" placeholder="Ej: 298.15" class="w-full pl-4 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 outline-none transition-all duration-200 bg-gray-50 text-gray-800 text-lg shadow-sm" oninput="convertirDesdeKelvin()">
+                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-gray-400 font-semibold">
+                        K
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Botón para limpiar -->
+        <div class="mt-8 text-center">
+            <button onclick="limpiarCampos()" class="text-sm font-medium text-gray-500 hover:text-red-700 transition-colors duration-200 flex items-center justify-center mx-auto">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Limpiar Valores
+            </button>
+        </div>
+
+        <!-- Créditos de autor -->
+        <div class="mt-6 pt-4 border-t border-gray-200/80 text-center">
+            <p class="text-xs text-gray-600 font-medium">
+                Desarrollado por <span class="font-semibold text-red-700">Carlos De la Cruz Chavez</span><br>
+                <span class="text-gray-500 text-[11px]">asistido por Gemini IA</span>
+            </p>
+        </div>
+
+    </div>
+
+    <!-- Script de Lógica -->
+    <script>
+        // Canvas interactivo con figuras geométricas flotantes
+        const canvas = document.getElementById('bgCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let shapes = [];
+        
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class FloatingShape {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 35 + 15;
+                this.speedX = (Math.random() - 0.5) * 0.7;
+                this.speedY = (Math.random() - 0.5) * 0.7;
+                this.rotation = Math.random() * Math.PI * 2;
+                this.rotSpeed = (Math.random() - 0.5) * 0.02;
+                this.type = Math.floor(Math.random() * 3); // 0: Círculo, 1: Cuadrado, 2: Triángulo
+                this.alpha = Math.random() * 0.25 + 0.1;
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.rotation += this.rotSpeed;
+
+                if (this.x < -50 || this.x > canvas.width + 50 || this.y < -50 || this.y > canvas.height + 50) {
+                    this.reset();
+                }
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.rotation);
+                ctx.fillStyle = `rgba(239, 68, 68, ${this.alpha})`;
+                ctx.strokeStyle = `rgba(254, 202, 202, ${this.alpha + 0.15})`;
+                ctx.lineWidth = 1.5;
+
+                ctx.beginPath();
+                if (this.type === 0) {
+                    ctx.arc(0, 0, this.size / 2, 0, Math.PI * 2);
+                } else if (this.type === 1) {
+                    ctx.rect(-this.size / 2, -this.size / 2, this.size, this.size);
+                } else {
+                    ctx.moveTo(0, -this.size / 2);
+                    ctx.lineTo(this.size / 2, this.size / 2);
+                    ctx.lineTo(-this.size / 2, this.size / 2);
+                    ctx.closePath();
+                }
+                ctx.fill();
+                ctx.stroke();
+                ctx.restore();
+            }
+        }
+
+        // Crear 30 figuras flotantes
+        for (let i = 0; i < 30; i++) {
+            shapes.push(new FloatingShape());
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            shapes.forEach(shape => {
+                shape.update();
+                shape.draw();
+            });
+            requestAnimationFrame(animate);
+        }
+        
+        animate();
+
+        // Obtener referencias a los elementos input
+        const inputCelsius = document.getElementById('celsius');
+        const inputFahrenheit = document.getElementById('fahrenheit');
+        const inputKelvin = document.getElementById('kelvin');
+
+        // Función para redondear a 2 decimales para mostrar resultados más limpios
+        function redondear(numero) {
+            return Math.round(numero * 100) / 100;
+        }
+
+        // Función llamada cuando el usuario escribe en el campo Celsius
+        function convertirDesdeCelsius() {
+            let celsius = parseFloat(inputCelsius.value);
+            
+            // Si el campo está vacío, limpiar los demás
+            if (isNaN(celsius)) {
+                inputFahrenheit.value = '';
+                inputKelvin.value = '';
+                return;
+            }
+
+            // Realizar conversiones
+            let fahrenheit = (celsius * 9/5) + 32;
+            let kelvin = celsius + 273.15;
+
+            // Actualizar los otros campos
+            inputFahrenheit.value = redondear(fahrenheit);
+            inputKelvin.value = redondear(kelvin);
+        }
+
+        // Función llamada cuando el usuario escribe en el campo Fahrenheit
+        function convertirDesdeFahrenheit() {
+            let fahrenheit = parseFloat(inputFahrenheit.value);
+
+            if (isNaN(fahrenheit)) {
+                inputCelsius.value = '';
+                inputKelvin.value = '';
+                return;
+            }
+
+            let celsius = (fahrenheit - 32) * 5/9;
+            let kelvin = (fahrenheit - 32) * 5/9 + 273.15;
+
+            inputCelsius.value = redondear(celsius);
+            inputKelvin.value = redondear(kelvin);
+        }
+
+        // Función llamada cuando el usuario escribe en el campo Kelvin
+        function convertirDesdeKelvin() {
+            let kelvin = parseFloat(inputKelvin.value);
+
+            if (isNaN(kelvin)) {
+                inputCelsius.value = '';
+                inputFahrenheit.value = '';
+                return;
+            }
+
+            let celsius = kelvin - 273.15;
+            let fahrenheit = (kelvin - 273.15) * 9/5 + 32;
+
+            inputCelsius.value = redondear(celsius);
+            inputFahrenheit.value = redondear(fahrenheit);
+        }
+
+        // Función para limpiar todos los campos
+        function limpiarCampos() {
+            inputCelsius.value = '';
+            inputFahrenheit.value = '';
+            inputKelvin.value = '';
+            inputCelsius.focus(); // Devolver el foco al primer campo
+        }
+    </script>
+</body>
+</html>
